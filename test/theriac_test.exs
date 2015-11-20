@@ -3,10 +3,13 @@ defmodule TheriacTest do
   import Theriac
 
   test "mapping transducer" do
-    incrementing = map(fn inp -> inp + 1 end)
-    reducer = fn {result, input} -> result + input end
-    assert incrementing.(reducer).({0,1}) == 2
+    result = transduce([1,2,3],map(fn inp -> inp + 1 end))
+    assert result == [2,3,4]
   end
 
+  test "filtering transducer" do
+    result = transduce([1,2,3],filter(fn inp -> inp > 2 end))
+    assert result == [3]
+  end
 
 end
