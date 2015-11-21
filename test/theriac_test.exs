@@ -17,4 +17,9 @@ defmodule TheriacTest do
     assert result == [1,2]
   end
 
+  test "take while" do
+    result = transduce([1,3,5,2,4],take_while(fn inp -> inp < 5 end))
+    assert result == [1,3]
+  end
+
 end
