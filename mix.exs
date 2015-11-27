@@ -22,7 +22,7 @@ defmodule Theriac.Mixfile do
   end
 
   defp package do
-    [files: ["lib", "mix.exs", "README*", "LICENSE*", "license*"],
+    [files: ["lib", "mix.exs", "README*", "LICENSE*"],
      maintainers: ["Tim de Putter"],
      licenses: ["The MIT License"],
      links: %{"GitHub" => "https://github.com/timdeputter/theriac"}]

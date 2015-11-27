@@ -1,7 +1,7 @@
 Theriac
 =======
 
-Implementation of Transducers in elixir.
+Implementation of Transducers in elixir. (Work in progress)
 
 ## License
 
