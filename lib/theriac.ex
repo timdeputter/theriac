@@ -9,7 +9,7 @@ defmodule Theriac do
       {{:reduced, result}, input} -> {:reduced, result}
       {result, input} -> result ++ [input] 
     end)
-    case  Enum.reduce(enum,[], fn(input,result) -> reducer.({result,input}) end) do
+    case Enum.reduce(enum,[], fn(input,result) -> reducer.({result,input}) end) do
       {:reduced, r} -> r
       r -> r
     end
