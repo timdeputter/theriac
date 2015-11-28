@@ -18,7 +18,7 @@ defmodule Theriac.Mixfile do
   end
 
   defp deps do
-    [{:excoveralls, "~> 0.3", only: [:dev, :test]},{:fitex, "~> 0.0.1"}]
+    [{:excoveralls, "~> 0.3", only: [:dev, :test]}]
   end
 
   defp package do
