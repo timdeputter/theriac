@@ -22,4 +22,9 @@ defmodule TheriacTest do
     assert result == [1,3]
   end
 
+  test "take" do
+    result = transduce([1,2,3,4,5,6,7,8,9], take(2))
+    assert result == [1,2]
+  end
+
 end
