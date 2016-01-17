@@ -19,9 +19,13 @@ defmodule Theriac do
       {{result, state}, input} -> {result ++ [input], state}
     end)
     case Enum.reduce(enum,{[],initialState}, fn(input,rs) -> reducer.({rs,input}) end) do
-      {:reduced, {result,state}} -> result
+      {:reduced, {result,_state}} -> result
       {r,_s} -> r
     end
+  end
+
+  def comb list do
+    {:stateless, Enum.reduce(list, fn i -> i end,fn({:stateless, f},c) -> fn i -> c.(f.(i)) end end)}
   end
 
   defp stateless_transducer reduction do
@@ -74,6 +78,14 @@ defmodule Theriac do
         else
           {:reduced,{result,state}}
         end
+    end
+  end
+
+  def scan initialVal, f do
+    stateful_transducer initialVal, 
+    fn rf, {result,state}, input -> 
+      current = f.(input, state)
+      rf.({{result,current},current})
     end
   end
 
