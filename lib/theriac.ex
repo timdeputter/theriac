@@ -4,17 +4,7 @@ defmodule Theriac do
   Theriac is a implementation of clojure style transducers in elixir
   """
 
-  def transduce enum, {:stateless, transducer} do
-    reducer = transducer.(fn 
-      {result, input} -> result ++ [input] 
-    end)
-    case Enum.reduce(enum,[], fn(input,result) -> reducer.({result,input}) end) do
-      {:reduced, r} -> r
-      r -> r
-    end
-  end
-
-  def transduce enum, {:stateful, initialState, transducer} do
+  def transduce enum, {initialState, transducer} do
     reducer = transducer.(fn 
       {{result, state}, input} -> {result ++ [input], state}
     end)
@@ -28,17 +18,12 @@ defmodule Theriac do
     {:stateless, Enum.reduce(list, fn i -> i end,fn({:stateless, f},c) -> fn i -> c.(f.(i)) end end)}
   end
 
-  defp stateless_transducer reduction do
-    {:stateless, fn rf ->
-      fn
-        {{:reduced, result}, _input} -> {:reduced, result}
-        {result, input} -> reduction.(rf, result, input)
-      end
-    end}
+  defp  stateless_transducer reduction do
+    stateful_transducer :stateless, reduction
   end
 
   defp stateful_transducer initialState, reduction do
-    {:stateful, initialState, fn rf ->
+    {initialState, fn rf ->
       fn
         {{:reduced, rs}, _input} -> {:reduced, rs}
         {rs, input} -> reduction.(rf, rs, input)
