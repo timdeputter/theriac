@@ -18,7 +18,7 @@ defmodule Theriac.Mixfile do
   end
 
   defp deps do
-    [{:excoveralls, "~> 0.3", only: [:dev, :test]}]
+    [{:excoveralls, "~> 0.3", only: [:dev, :test]}, { :uuid, "~> 1.1" }]
   end
 
   defp package do
