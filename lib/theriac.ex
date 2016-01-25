@@ -1,7 +1,7 @@
 defmodule Theriac do
 
   @moduledoc """
-  Theriac is a implementation of clojure style transducers in elixir.
+  Theriac is an implementation of clojure style transducers in elixir.
   """
 
   @doc ~S"""
@@ -12,8 +12,8 @@ defmodule Theriac do
       iex> Theriac.transduce([1,2,7,9], Theriac.take(1))
       [1]
   """
-  def transduce enum, {id, initialState, transducer} do
-    transduce enum, {[{id, initialState}], transducer}
+  def transduce enum, {id, initial_state, transducer} do
+    transduce enum, {[{id, initial_state}], transducer}
   end
 
   def transduce enum, {initialState, transducer} do
@@ -152,10 +152,10 @@ defmodule Theriac do
   def scan initialVal, f do
     id = UUID.uuid1()
     transducer id, initialVal, 
-    fn rf, {result,states}, input -> 
+    fn rf, {result, states}, input -> 
       state = get_state states, id
       current = f.(input, state)
-      rf.({{result,update_state(states, id, current)},current})
+      rf.({{result, update_state(states, id, current)}, current})
     end
   end
 
