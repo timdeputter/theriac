@@ -119,6 +119,28 @@ defmodule Theriac do
   end
 
   @doc ~S"""
+  Skips the first n elements and calls the step function for the n+1th element.
+
+  ## Examples
+
+      iex>Theriac.transduce([1,11,3,4,5,6,7,8,9], Theriac.skip(5))
+      [6,7,8,9]
+  """
+  def skip count do
+    id = UUID.uuid1()
+    transducer id, 0, fn
+      rf, {result, states}, input -> 
+        state = get_state states, id
+        result_with_updated_state = {result, update_state(states, id, state+1)}
+        if state >= count do
+          rf.({result_with_updated_state, input})
+        else
+          result_with_updated_state
+        end
+    end
+  end
+
+  @doc ~S"""
   Calls the given function with every element and the result of calling 
   the function with the previous element or the given initial value if it's the first element.
   Calls the step function with every result.
