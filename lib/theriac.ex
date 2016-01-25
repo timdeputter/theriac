@@ -16,13 +16,13 @@ defmodule Theriac do
     transduce enum, {[{id, initial_state}], transducer}
   end
 
-  def transduce enum, {initialState, transducer} do
+  def transduce enum, {initial_state, transducer} do
     reducer = transducer.(fn 
       {{result, state}, input} -> {result ++ [input], state}
     end)
-    case Enum.reduce(enum,{[],initialState}, fn(input,rs) -> reducer.({rs,input}) end) do
-      {:reduced, {result,_state}} -> result
-      {r,_s} -> r
+    case Enum.reduce(enum,{[],initial_state}, fn(input,rs) -> reducer.({rs,input}) end) do
+      {:reduced, {result, _state}} -> result
+      {r, _s} -> r
     end
   end
 
@@ -37,8 +37,8 @@ defmodule Theriac do
   """
   def comb list do
     Enum.reduce(list, {[], fn i -> i end},
-      fn({id, initialState, f},{cummulatedInitialState, c}) ->
-        {cummulatedInitialState ++ [{id, initialState}], fn i -> c.(f.(i)) end} end)
+      fn({id, initial_state, f},{cummulated_initial_state, c}) ->
+        {cummulated_initial_state ++ [{id, initial_state}], fn i -> c.(f.(i)) end} end)
   end
 
   @doc ~S"""
@@ -65,7 +65,7 @@ defmodule Theriac do
   """
   def remove f do
     transducer UUID.uuid1(), :stateless, fn 
-      rf, result, input -> unless f.(input), do: rf.({result,input}), else: result 
+      rf, result, input -> unless f.(input), do: rf.({result, input}), else: result 
     end
   end
 
@@ -79,7 +79,7 @@ defmodule Theriac do
   """
   def filter f do
     transducer UUID.uuid1(), :stateless, fn 
-      rf, result, input -> if f.(input), do: rf.({result,input}), else: result
+      rf, result, input -> if f.(input), do: rf.({result, input}), else: result
     end
   end
 
@@ -94,7 +94,7 @@ defmodule Theriac do
   """
   def take_while f do
     transducer UUID.uuid1(), :stateless, fn 
-      rf, result, input -> if f.(input), do: rf.({result,input}), else: {:reduced, result}
+      rf, result, input -> if f.(input), do: rf.({result, input}), else: {:reduced, result}
     end
   end
 
@@ -108,12 +108,12 @@ defmodule Theriac do
   def take count do
     id = UUID.uuid1()
     transducer id, 0, fn
-      rf, {result,states}, input -> 
+      rf, {result, states}, input -> 
         state = get_state states, id
         if state < count do
-          rf.({{result,update_state(states, id, state+1)},input})
+          rf.({{result, update_state(states, id, state+1)}, input})
         else
-          {:reduced,{result,state}}
+          {:reduced, {result, state}}
         end
     end
   end
