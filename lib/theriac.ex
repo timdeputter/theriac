@@ -50,7 +50,7 @@ defmodule Theriac do
       [2,3,4]
   """
   def map f do
-    transducer UUID.uuid1(), :stateless, fn 
+    transducer new_id, :stateless, fn 
       rf, result, input -> rf.({result, f.(input)}) 
     end
   end
@@ -64,7 +64,7 @@ defmodule Theriac do
       [1,2]
   """
   def remove f do
-    transducer UUID.uuid1(), :stateless, fn 
+    transducer new_id, :stateless, fn 
       rf, result, input -> unless f.(input), do: rf.({result, input}), else: result 
     end
   end
@@ -78,7 +78,7 @@ defmodule Theriac do
       [1,2]
   """
   def filter f do
-    transducer UUID.uuid1(), :stateless, fn 
+    transducer new_id, :stateless, fn 
       rf, result, input -> if f.(input), do: rf.({result, input}), else: result
     end
   end
@@ -93,7 +93,7 @@ defmodule Theriac do
       [1,3]
   """
   def take_while f do
-    transducer UUID.uuid1(), :stateless, fn 
+    transducer new_id, :stateless, fn 
       rf, result, input -> if f.(input), do: rf.({result, input}), else: {:reduced, result}
     end
   end
@@ -106,7 +106,7 @@ defmodule Theriac do
       [1,11]
   """
   def take count do
-    id = UUID.uuid1()
+    id = new_id
     transducer id, 0, fn
       rf, {result, states}, input -> 
         state = get_state states, id
@@ -127,7 +127,7 @@ defmodule Theriac do
       [6,7,8,9]
   """
   def skip count do
-    id = UUID.uuid1()
+    id = new_id
     transducer id, 0, fn
       rf, {result, states}, input -> 
         state = get_state states, id
@@ -150,7 +150,7 @@ defmodule Theriac do
       [1,3,6,10,15]
   """
   def scan initialVal, f do
-    id = UUID.uuid1()
+    id = new_id
     transducer id, initialVal, 
     fn rf, {result, states}, input -> 
       state = get_state states, id
@@ -175,6 +175,10 @@ defmodule Theriac do
 
   defp update_state states, given_id, new_state do
     List.keyreplace(states, given_id, 0, {given_id, new_state})
+  end
+
+  defp new_id do
+    UUID.uuid1()
   end
 
 end
