@@ -18,9 +18,9 @@ defmodule Theriac do
 
   def transduce enum, {initial_state, transducer} do
     reducer = transducer.(fn 
-      {{result, state}, input} -> {result ++ [input], state}
+      {result, state}, input -> {result ++ [input], state}
     end)
-    case Enum.reduce(enum,{[],initial_state}, fn(input,rs) -> reducer.({rs,input}) end) do
+    case Enum.reduce(enum,{[],initial_state}, fn(input,rs) -> reducer.(rs,input) end) do
       {:reduced, {result, _state}} -> result
       {r, _s} -> r
     end
@@ -51,7 +51,7 @@ defmodule Theriac do
   """
   def map f do
     transducer new_id, :stateless, fn 
-      rf, result, input -> rf.({result, f.(input)}) 
+      rf, result, input -> rf.(result, f.(input)) 
     end
   end
 
@@ -65,7 +65,7 @@ defmodule Theriac do
   """
   def remove f do
     transducer new_id, :stateless, fn 
-      rf, result, input -> unless f.(input), do: rf.({result, input}), else: result 
+      rf, result, input -> unless f.(input), do: rf.(result, input), else: result 
     end
   end
 
@@ -79,7 +79,7 @@ defmodule Theriac do
   """
   def filter f do
     transducer new_id, :stateless, fn 
-      rf, result, input -> if f.(input), do: rf.({result, input}), else: result
+      rf, result, input -> if f.(input), do: rf.(result, input), else: result
     end
   end
 
@@ -94,7 +94,7 @@ defmodule Theriac do
   """
   def take_while f do
     transducer new_id, :stateless, fn 
-      rf, result, input -> if f.(input), do: rf.({result, input}), else: {:reduced, result}
+      rf, result, input -> if f.(input), do: rf.(result, input), else: {:reduced, result}
     end
   end
 
@@ -111,7 +111,7 @@ defmodule Theriac do
       rf, {result, states}, input -> 
         state = get_state states, id
         if state < count do
-          rf.({{result, update_state(states, id, state+1)}, input})
+          rf.({result, update_state(states, id, state+1)}, input)
         else
           {:reduced, {result, state}}
         end
@@ -127,16 +127,23 @@ defmodule Theriac do
       [6,7,8,9]
   """
   def skip count do
-    id = new_id
-    transducer id, 0, fn
-      rf, {result, states}, input -> 
-        state = get_state states, id
-        result_with_updated_state = {result, update_state(states, id, state+1)}
-        if state >= count do
-          rf.({result_with_updated_state, input})
-        else
-          result_with_updated_state
-        end
+    #id = new_id
+    #transducer id, 0, fn
+    #  rf, {result, states}, input -> 
+    #    state = get_state states, id
+    #    result_with_updated_state = {result, update_state(states, id, state+1)}
+    #    if state >= count do
+    #      rf.(result_with_updated_state, input)
+    #  else
+    #    result_with_updated_state
+    #  end
+    #end
+    daduce 0, fn continue, ret, state, input ->
+      if state >= count do
+        continue.(state+1, input)
+      else
+        ret.(state+1) 
+      end
     end
   end
 
@@ -150,20 +157,32 @@ defmodule Theriac do
       [1,3,6,10,15]
   """
   def scan initialVal, f do
+    daduce initialVal, fn continue, ret, state, input ->
+      current = f.(input, state)
+      continue.(current,current)
+    end
+  end
+
+  defp daduce initialVal, func do
     id = new_id
     transducer id, initialVal, 
     fn rf, {result, states}, input -> 
       state = get_state states, id
-      current = f.(input, state)
-      rf.({{result, update_state(states, id, current)}, current})
+      continuation = fn new_state, input ->
+        rf.({result, update_state(states, id, new_state)}, input)
+      end
+      ret = fn new_state ->
+        {result, update_state(states, id, new_state)}
+      end
+      func.(continuation, ret, state, input)
     end
   end
 
   defp transducer id, initialState, reduction do
     {id, initialState, fn rf ->
       fn
-        {{:reduced, rs}, _input} -> {:reduced, rs}
-        {rs, input} -> reduction.(rf, rs, input)
+        {:reduced, rs}, _input -> {:reduced, rs}
+        rs, input -> reduction.(rf, rs, input)
       end
     end}
   end
