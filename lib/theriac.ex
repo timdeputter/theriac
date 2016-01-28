@@ -127,18 +127,7 @@ defmodule Theriac do
       [6,7,8,9]
   """
   def skip count do
-    #id = new_id
-    #transducer id, 0, fn
-    #  rf, {result, states}, input -> 
-    #    state = get_state states, id
-    #    result_with_updated_state = {result, update_state(states, id, state+1)}
-    #    if state >= count do
-    #      rf.(result_with_updated_state, input)
-    #  else
-    #    result_with_updated_state
-    #  end
-    #end
-    daduce 0, fn continue, ret, state, input ->
+    stateful_transduce 0, fn continue, ret, state, input ->
       if state >= count do
         continue.(state+1, input)
       else
@@ -157,13 +146,13 @@ defmodule Theriac do
       [1,3,6,10,15]
   """
   def scan initialVal, f do
-    daduce initialVal, fn continue, ret, state, input ->
+    stateful_transduce initialVal, fn continue, ret, state, input ->
       current = f.(input, state)
       continue.(current,current)
     end
   end
 
-  defp daduce initialVal, func do
+  defp stateful_transduce initialVal, func do
     id = new_id
     transducer id, initialVal, 
     fn rf, {result, states}, input -> 
