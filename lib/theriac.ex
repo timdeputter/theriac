@@ -106,14 +106,11 @@ defmodule Theriac do
       [1,11]
   """
   def take count do
-    id = new_id
-    transducer id, 0, fn
-      rf, {result, states}, input -> 
-        state = get_state states, id
+    stateful_transduce 0, fn step, skip, state, input ->
         if state < count do
-          rf.({result, update_state(states, id, state+1)}, input)
+          step.(state+1, input)
         else
-          {:reduced, {result, state}}
+          skip.(state+1)
         end
     end
   end
