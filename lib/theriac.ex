@@ -127,11 +127,11 @@ defmodule Theriac do
       [6,7,8,9]
   """
   def skip count do
-    stateful_transduce 0, fn continue, ret, state, input ->
+    stateful_transduce 0, fn step, skip, state, input ->
       if state >= count do
-        continue.(state+1, input)
+        step.(state+1, input)
       else
-        ret.(state+1) 
+        skip.(state+1) 
       end
     end
   end
@@ -146,9 +146,9 @@ defmodule Theriac do
       [1,3,6,10,15]
   """
   def scan initialVal, f do
-    stateful_transduce initialVal, fn continue, ret, state, input ->
+    stateful_transduce initialVal, fn step, skip, state, input ->
       current = f.(input, state)
-      continue.(current,current)
+      step.(current,current)
     end
   end
 
