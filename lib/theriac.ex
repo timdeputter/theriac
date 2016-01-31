@@ -150,6 +150,24 @@ defmodule Theriac do
     end
   end
 
+  @doc ~S"""
+  Calls the step function for every element, if no previous element was equal to the current element.
+  ## Examples
+
+      iex>Theriac.transduce([1,3,2,3,2,4,5], Theriac.distinct)
+      [1,3,2,4,5]
+  """
+  def distinct do
+    stateful_transduce [], fn step, skip, state, input ->
+      if(Enum.all?(state, fn e -> e != input end)) do
+        new_state = state ++ [input]
+        step.(new_state, input)
+      else
+        skip.(state)
+      end
+    end
+  end
+
   defp stateful_transduce initialVal, func do
     id = new_id
     transducer id, initialVal, 
