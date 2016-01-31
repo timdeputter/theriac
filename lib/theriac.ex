@@ -1,4 +1,5 @@
 defmodule Theriac do
+  import Enum
 
   @moduledoc """
   Theriac is an implementation of clojure style transducers in elixir.
@@ -21,7 +22,7 @@ defmodule Theriac do
       {:reduced, rs}, _input -> {:reduced, rs}
       {result, state}, input -> {result ++ [input], state}
     end)
-    case Enum.reduce(enum,{[],initial_state}, fn(input,rs) -> reducer.(rs,input) end) do
+    case reduce(enum,{[],initial_state}, fn(input,rs) -> reducer.(rs,input) end) do
       {:reduced, {result, _state}} -> result
       {r, _s} -> r
     end
@@ -37,7 +38,7 @@ defmodule Theriac do
       [2,4,14]
   """
   def comb list do
-    Enum.reduce(list, {[], fn i -> i end},
+    reduce(list, {[], fn i -> i end},
       fn({id, initial_state, f},{cummulated_initial_state, c}) ->
         {cummulated_initial_state ++ [{id, initial_state}], fn i -> c.(f.(i)) end} end)
   end
@@ -159,7 +160,7 @@ defmodule Theriac do
   """
   def distinct do
     stateful_transduce [], fn step, skip, state, input ->
-      if(Enum.all?(state, fn e -> e != input end)) do
+      if(all?(state, fn e -> e != input end)) do
         new_state = state ++ [input]
         step.(new_state, input)
       else
